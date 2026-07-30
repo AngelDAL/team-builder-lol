@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0D0D1A"/>
+      <stop offset="50%" style="stop-color:#1A1A2E"/>
+      <stop offset="100%" style="stop-color:#16213E"/>
+    </linearGradient>
+    <linearGradient id="purple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#A78BFA"/>
+      <stop offset="100%" style="stop-color:#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#22D3EE"/>
+      <stop offset="100%" style="stop-color:#06B6D4"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="800" height="200" fill="url(#bg)"/>
+
+  <!-- Decorative lines -->
+  <line x1="0" y1="50" x2="800" y2="50" stroke="#7C3AED" stroke-width="0.5" opacity="0.3"/>
+  <line x1="0" y1="150" x2="800" y2="150" stroke="#06B6D4" stroke-width="0.5" opacity="0.3"/>
+
+  <!-- Champion icons (placeholder circles) -->
+  <circle cx="80" cy="100" r="24" fill="none" stroke="#7C3AED" stroke-width="2" opacity="0.4"/>
+  <circle cx="140" cy="100" r="24" fill="none" stroke="#7C3AED" stroke-width="2" opacity="0.4"/>
+  <circle cx="200" cy="100" r="24" fill="none" stroke="#7C3AED" stroke-width="2" opacity="0.4"/>
+  <circle cx="600" cy="100" r="24" fill="none" stroke="#06B6D4" stroke-width="2" opacity="0.4"/>
+  <circle cx="660" cy="100" r="24" fill="none" stroke="#06B6D4" stroke-width="2" opacity="0.4"/>
+  <circle cx="720" cy="100" r="24" fill="none" stroke="#06B6D4" stroke-width="2" opacity="0.4"/>
+
+  <!-- VS -->
+  <text x="400" y="110" text-anchor="middle" font-family="system-ui, sans-serif" font-size="28" font-weight="900" fill="#374151" letter-spacing="4">VS</text>
+
+  <!-- Title -->
+  <text x="400" y="60" text-anchor="middle" font-family="system-ui, sans-serif" font-size="36" font-weight="900" fill="url(#purple)" filter="url(#glow)">TEAM BUILDER LOL</text>
+
+  <!-- Subtitle -->
+  <text x="400" y="175" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#6B7280" letter-spacing="6">DRAFT SIMULATOR &amp; TACTICAL WHITEBOARD</text>
+
+  <!-- Left accent -->
+  <rect x="0" y="0" width="4" height="200" fill="url(#purple)" opacity="0.6"/>
+</svg>
