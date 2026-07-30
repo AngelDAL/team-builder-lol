@@ -1,26 +1,188 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ocaso-bg: #0a0a0f;
+  --ocaso-bg-alt: #0d0d1a;
+  --ocaso-card: #111128;
+  --ocaso-card-border: #1e1e3f;
+  --ocaso-purple: #7c3aed;
+  --ocaso-purple-dark: #5b21b6;
+  --ocaso-purple-light: #a78bfa;
+  --ocaso-purple-glow: rgba(124, 58, 237, 0.15);
+  --ocaso-cyan: #22d3ee;
+  --ocaso-cyan-dark: #0891b2;
+  --ocaso-text: #e8e6e3;
+  --ocaso-text-muted: #6b7280;
+  --ocaso-danger: #e84057;
+  --ocaso-success: #2ecc71;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--ocaso-bg);
+  --color-foreground: var(--ocaso-text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Fondo con patrón geométrico tipo Team Ocaso */
+body {
+  background-color: var(--ocaso-bg);
+  background-image:
+    /* Rombo morado grande */
+    linear-gradient(45deg, var(--ocaso-purple-glow) 1px, transparent 1px),
+    linear-gradient(-45deg, var(--ocaso-purple-glow) 1px, transparent 1px),
+    /* Patrón punteado */
+    radial-gradient(circle at 10px 10px, rgba(124, 58, 237, 0.03) 1px, transparent 1px),
+    /* Líneas sutiles */
+    repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(34, 211, 238, 0.02) 40px, rgba(34, 211, 238, 0.02) 41px),
+    repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34, 211, 238, 0.02) 40px, rgba(34, 211, 238, 0.02) 41px);
+  background-size:
+    60px 60px,
+    60px 60px,
+    20px 20px,
+    41px 41px,
+    41px 41px;
+  background-position: 0 0, 30px 30px, 0 0, 0 0, 0 0;
+  color: var(--ocaso-text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Scrollbar custom */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ocaso-bg-alt);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ocaso-purple-dark);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ocaso-purple);
+}
+
+/* ─── Animaciones ─── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.35s ease-out;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-up {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(124, 58, 237, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(124, 58, 237, 0.4); }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+.animate-slide-left {
+  animation: slideInLeft 0.25s ease-out;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.loading-shimmer {
+  background: linear-gradient(90deg, var(--ocaso-card) 25%, var(--ocaso-card-border) 50%, var(--ocaso-card) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 12px;
+}
+
+/* ─── Cards Ocaso ─── */
+.lol-card {
+  background: var(--ocaso-card);
+  border: 1px solid var(--ocaso-card-border);
+  border-radius: 16px;
+  transition: all 0.25s ease;
+}
+.lol-card:hover {
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+.lol-card-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+/* ─── Botón Ocaso ─── */
+.btn-ocaso {
+  background: linear-gradient(135deg, var(--ocaso-purple-dark), var(--ocaso-purple), var(--ocaso-purple-light));
+  color: #fff;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+  box-shadow: 0 0 15px rgba(124, 58, 237, 0.2);
+}
+.btn-ocaso:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+  box-shadow: 0 0 25px rgba(124, 58, 237, 0.35);
+}
+.btn-ocaso:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Botón secundario cyan */
+.btn-cyan {
+  background: linear-gradient(135deg, var(--ocaso-cyan-dark), var(--ocaso-cyan));
+  color: #0a0a0f;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.2);
+}
+.btn-cyan:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+/* ─── Input Ocaso ─── */
+.input-ocaso {
+  background: rgba(10, 10, 15, 0.8);
+  border: 1px solid var(--ocaso-card-border);
+  border-radius: 12px;
+  color: var(--ocaso-text);
+  transition: all 0.25s ease;
+}
+.input-ocaso:focus {
+  outline: none;
+  border-color: var(--ocaso-purple);
+  box-shadow: 0 0 15px rgba(124, 58, 237, 0.12);
+}
+
+/* ─── Selección activa ─── */
+.selected-ocaso {
+  border-color: var(--ocaso-purple) !important;
+  background: rgba(124, 58, 237, 0.1) !important;
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.15);
+}
+
+/* ─── Badge ─── */
+.badge-ocaso {
+  background: rgba(124, 58, 237, 0.15);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  color: var(--ocaso-purple-light);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 10px;
+  font-weight: 600;
 }

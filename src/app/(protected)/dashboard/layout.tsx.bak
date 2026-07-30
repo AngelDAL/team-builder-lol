@@ -1,0 +1,38 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import NavBar from "@/components/NavBar";
+
+function isAuthed(): boolean {
+  if (typeof window === "undefined") return false;
+  return !!localStorage.getItem("lolteam_token");
+}
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+  const authed = isAuthed();
+
+  useEffect(() => {
+    if (!authed) router.push("/");
+  }, [authed, router]);
+
+  if (!authed) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="loading-shimmer w-12 h-12 rounded-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen">
+      <NavBar />
+      <main className="max-w-6xl mx-auto px-4 py-6">{children}</main>
+    </div>
+  );
+}

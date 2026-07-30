@@ -1,65 +1,150 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { OcasoLogo } from "@/components/OcasoIcons";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [summonerName, setSummonerName] = useState("");
+  const [tag, setTag] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  // Auto-login with saved token
+  useEffect(() => {
+    const token = localStorage.getItem("lolteam_token");
+    if (token) {
+      fetch("/api/users", { headers: { Authorization: `Bearer ${token}` } })
+        .then((r) => { if (r.ok) router.push("/dashboard"); else setLoading(false); })
+        .catch(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const name = summonerName.trim();
+    const tagVal = tag.trim().toUpperCase();
+
+    if (!name || !tagVal) {
+      setError("Completa los dos campos");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Single endpoint handles both login and register
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ summonerName: name, tag: tagVal }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) { setError(data.error); setLoading(false); return; }
+
+      localStorage.setItem("lolteam_token", data.token);
+      localStorage.setItem("lolteam_user", JSON.stringify(data.user));
+
+      // Try to fetch profile icon in background
+      fetch("/api/users/refresh-icon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.token}` },
+        body: JSON.stringify({ summonerName: name, tag: tagVal }),
+      }).then(r => r.json()).then(d => {
+        if (d.profileIconId) {
+          const u = JSON.parse(localStorage.getItem("lolteam_user") || "{}");
+          u.profileIconId = d.profileIconId;
+          localStorage.setItem("lolteam_user", JSON.stringify(u));
+        }
+      }).catch(() => {});
+
+      router.push("/dashboard");
+    } catch {
+      setError("Error de conexión");
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--ocaso-bg)]">
+        <div className="animate-pulse">
+          <OcasoLogo size={48} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--ocaso-bg)]">
+      <div className="w-full max-w-sm">
+        {/* Logo + Título */}
+        <div className="text-center mb-8">
+          <div className="mx-auto mb-4">
+            <OcasoLogo size={64} />
+          </div>
+          <h1 className="text-xl font-bold text-[var(--ocaso-purple-light)] tracking-widest uppercase">
+            Team Ocaso
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-xs text-[var(--ocaso-text-muted)] mt-1.5">
+            Organiza las composiciones de tu equipo
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="bg-[var(--ocaso-card)] border border-[var(--ocaso-card-border)] rounded-2xl p-6">
+          {error && (
+            <div className="bg-red-900/20 border border-red-800/30 text-red-400 text-xs px-3 py-2 rounded-xl mb-4 text-center">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-[10px] text-[var(--ocaso-text-muted)] mb-1.5 uppercase tracking-wider font-semibold">
+                Tu Riot ID
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={summonerName}
+                  onChange={(e) => setSummonerName(e.target.value)}
+                  className="input-ocaso flex-1 px-3 py-2.5 text-sm min-w-0"
+                  placeholder="Nombre"
+                  required
+                />
+                <div className="flex items-center text-[var(--ocaso-text-muted)] text-sm font-bold shrink-0">#</div>
+                <input
+                  type="text"
+                  value={tag}
+                  onChange={(e) => setTag(e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase())}
+                  className="input-ocaso w-24 px-3 py-2.5 text-sm text-center uppercase"
+                  placeholder="TAG"
+                  maxLength={5}
+                  required
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-ocaso w-full py-2.5 text-sm font-semibold disabled:opacity-50"
+            >
+              {loading ? "Entrando..." : "Entrar al equipo"}
+            </button>
+          </form>
+
+          <p className="text-[10px] text-[var(--ocaso-text-muted)]/60 text-center mt-4 leading-relaxed">
+            Ingresa tu Riot ID. Si el usuario no existe, se crea uno nuevo automáticamente.
+          </p>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

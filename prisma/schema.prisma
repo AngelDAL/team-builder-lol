@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id           Int              @id @default(autoincrement())
+  summonerName String           @map("summoner_name")
+  tag          String
+  displayName  String?          @map("display_name")
+  isOnline     Boolean          @default(false) @map("is_online")
+  lastSeen     DateTime?        @map("last_seen")
+  primaryRole  String?          @default("") @map("primary_role")
+  profileIconId Int?             @map("profile_icon_id")
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  champions    UserChampion[]
+  compositions TeamComposition[]
+  slots        TeamCompositionSlot[]
+  notes        CompositionNote[]
+  substitutes  SlotSubstitute[]
+  whiteboardElements     WhiteboardElement[] @relation("WhiteboardElementOwner")
+  lockedWhiteboardElements WhiteboardElement[] @relation("WhiteboardElementLocker")
+
+  @@unique([summonerName, tag])
+  @@map("users")
+}
+
+model Champion {
+  id         Int                   @id @default(autoincrement())
+  championId Int                   @unique @map("champion_id")
+  name       String
+  title      String?
+  imageUrl   String?               @map("image_url")
+  tags       String?               @default("")
+
+  users      UserChampion[]
+  slots      TeamCompositionSlot[]
+  substitutes SlotSubstitute[]
+
+  @@map("champions")
+}
+
+model UserChampion {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  championId Int      @map("champion_id")
+  role       String?  @default("")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  champion Champion @relation(fields: [championId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, championId])
+  @@map("user_champions")
+}
+
+model TeamComposition {
+  id          Int                     @id @default(autoincrement())
+  name        String
+  description String?
+  createdBy   Int                     @map("created_by")
+  createdAt   DateTime                @default(now()) @map("created_at")
+
+  creator    User                      @relation(fields: [createdBy], references: [id])
+  slots      TeamCompositionSlot[]
+  notes      CompositionNote[]
+  whiteboard Whiteboard?
+
+  @@map("team_compositions")
+}
+
+model TeamCompositionSlot {
+  id            Int              @id @default(autoincrement())
+  compositionId Int              @map("composition_id")
+  role          String
+  userId        Int              @map("user_id")
+  championId    Int              @map("champion_id")
+
+  composition TeamComposition @relation(fields: [compositionId], references: [id], onDelete: Cascade)
+  user        User           @relation(fields: [userId], references: [id])
+  champion    Champion       @relation(fields: [championId], references: [id])
+  substitutes SlotSubstitute[]
+
+  @@unique([compositionId, role])
+  @@map("team_composition_slots")
+}
+
+model CompositionNote {
+  id            Int      @id @default(autoincrement())
+  compositionId Int      @map("composition_id")
+  userId        Int      @map("user_id")
+  content       String
+  tags          String   @default("[]")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  composition  TeamComposition @relation(fields: [compositionId], references: [id], onDelete: Cascade)
+  user         User            @relation(fields: [userId], references: [id])
+
+  @@map("composition_notes")
+}
+
+model SlotSubstitute {
+  id         Int      @id @default(autoincrement())
+  slotId     Int      @map("slot_id")
+  championId Int      @map("champion_id")
+  userId     Int      @map("user_id")
+  sortOrder  Int      @default(0) @map("sort_order")
+
+  slot     TeamCompositionSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  champion Champion            @relation(fields: [championId], references: [id])
+  user     User                @relation(fields: [userId], references: [id])
+
+  @@unique([slotId, championId])
+  @@map("slot_substitutes")
+}
+
+model Whiteboard {
+  id            Int      @id @default(autoincrement())
+  compositionId Int      @unique @map("composition_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  composition TeamComposition   @relation(fields: [compositionId], references: [id], onDelete: Cascade)
+  elements    WhiteboardElement[]
+
+  @@map("whiteboards")
+}
+
+model WhiteboardElement {
+  id          String   @id
+  whiteboardId Int     @map("whiteboard_id")
+  type        String   // "note" | "champion"
+  x           Float
+  y           Float
+  width       Float    @default(200)
+  height      Float    @default(100)
+  rotation    Float    @default(0)
+  zIndex      Int      @default(0)
+  ownerId     Int?     @map("owner_id")
+  lockedBy    Int?     @map("locked_by")
+  lockedAt    DateTime?
+  content     Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  whiteboard Whiteboard @relation(fields: [whiteboardId], references: [id], onDelete: Cascade)
+  owner      User?      @relation("WhiteboardElementOwner", fields: [ownerId], references: [id])
+  locker     User?      @relation("WhiteboardElementLocker", fields: [lockedBy], references: [id])
+
+  @@map("whiteboard_elements")
+}
